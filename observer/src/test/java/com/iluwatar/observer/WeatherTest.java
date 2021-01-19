@@ -1,6 +1,6 @@
-/**
+/*
  * The MIT License
- * Copyright (c) 2014 Ilkka Seppälä
+ * Copyright © 2014-2019 Ilkka Seppälä
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +20,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package com.iluwatar.observer;
 
-import org.junit.Test;
+import com.iluwatar.observer.utils.InMemoryAppender;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -36,7 +41,19 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  *
  * @author Jeroen Meulemeester
  */
-public class WeatherTest extends StdOutTest {
+public class WeatherTest {
+
+  private InMemoryAppender appender;
+
+  @BeforeEach
+  public void setUp() {
+    appender = new InMemoryAppender(Weather.class);
+  }
+
+  @AfterEach
+  public void tearDown() {
+    appender.stop();
+  }
 
   /**
    * Add a {@link WeatherObserver}, verify if it gets notified of a weather change, remove the
@@ -44,21 +61,22 @@ public class WeatherTest extends StdOutTest {
    */
   @Test
   public void testAddRemoveObserver() {
-    final WeatherObserver observer = mock(WeatherObserver.class);
+    final var observer = mock(WeatherObserver.class);
 
-    final Weather weather = new Weather();
+    final var weather = new Weather();
     weather.addObserver(observer);
     verifyZeroInteractions(observer);
 
     weather.timePasses();
-    verify(getStdOutMock()).println("The weather changed to rainy.");
+    assertEquals("The weather changed to rainy.", appender.getLastMessage());
     verify(observer).update(WeatherType.RAINY);
 
     weather.removeObserver(observer);
     weather.timePasses();
-    verify(getStdOutMock()).println("The weather changed to windy.");
+    assertEquals("The weather changed to windy.", appender.getLastMessage());
 
-    verifyNoMoreInteractions(observer, getStdOutMock());
+    verifyNoMoreInteractions(observer);
+    assertEquals(2, appender.getLogSize());
   }
 
   /**
@@ -66,13 +84,13 @@ public class WeatherTest extends StdOutTest {
    */
   @Test
   public void testTimePasses() {
-    final WeatherObserver observer = mock(WeatherObserver.class);
-    final Weather weather = new Weather();
+    final var observer = mock(WeatherObserver.class);
+    final var weather = new Weather();
     weather.addObserver(observer);
 
-    final InOrder inOrder = inOrder(observer, getStdOutMock());
-    final WeatherType[] weatherTypes = WeatherType.values();
-    for (int i = 1; i < 20; i++) {
+    final var inOrder = inOrder(observer);
+    final var weatherTypes = WeatherType.values();
+    for (var i = 1; i < 20; i++) {
       weather.timePasses();
       inOrder.verify(observer).update(weatherTypes[i % weatherTypes.length]);
     }

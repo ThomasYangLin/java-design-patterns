@@ -1,6 +1,6 @@
-/**
+/*
  * The MIT License
- * Copyright (c) 2014 Ilkka Seppälä
+ * Copyright © 2014-2019 Ilkka Seppälä
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,16 +20,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package com.iluwatar.state;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- * 
  * Peaceful state.
- *
  */
 public class PeacefulState implements State {
 
-  private Mammoth mammoth;
+  private static final Logger LOGGER = LoggerFactory.getLogger(PeacefulState.class);
+
+  private final Mammoth mammoth;
 
   public PeacefulState(Mammoth mammoth) {
     this.mammoth = mammoth;
@@ -37,12 +41,12 @@ public class PeacefulState implements State {
 
   @Override
   public void observe() {
-    System.out.println(String.format("%s is calm and peaceful.", mammoth));
+    LOGGER.info("{} is calm and peaceful.", mammoth);
   }
 
   @Override
   public void onEnterState() {
-    System.out.println(String.format("%s calms down.", mammoth));
+    LOGGER.info("{} calms down.", mammoth);
   }
 
 }
